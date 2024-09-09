@@ -5,6 +5,8 @@ WIP;
 
 # Usage
 
+WIP;
+
 ```c
 // Create A Table And Data Array;
 unsigned char **h,*j;dbc(&h,&j,10,200);
