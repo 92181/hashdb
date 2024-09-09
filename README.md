@@ -26,5 +26,10 @@ dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else
 free(h);
 ```
 
+- [x] Finish defragmentation function.
+- [ ] Disk read/write.
+- [ ] Reallocate.
+- [ ] Combine with xxHash algorithm.
+
 # License
 This project uses the MIT Attribution license. If you like this project consider starring it.
