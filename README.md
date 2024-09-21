@@ -1,6 +1,7 @@
 # Tiny C Based HashDB
 A tiny database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
 
+This hash based database is fully embeddable and ...
 WIP;
 
 # Usage
@@ -32,4 +33,5 @@ free(h);
 - [ ] Combine with xxHash algorithm.
 
 # License
+It uses an custom implemention the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
 This project uses the MIT Attribution license. If you like this project consider starring it.
