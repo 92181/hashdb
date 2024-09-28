@@ -1,12 +1,12 @@
 # Tiny C Based HashDB
 A tiny database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
+The library is consists of a single C header file which can be easily included in any C or C++ project.
 
-This hash based database is fully embeddable and ...
+This hash based 'database' is thus fully embeddable and ...
 WIP;
 
 # Usage
-
-WIP;
+This is a basic example on how to use the small library correctly. More examples can be found in the example directory.
 
 ```c
 // Create A Table And Data Array;
@@ -26,11 +26,6 @@ dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else
 // Free The Table And Data Array;
 free(h);
 ```
-
-- [x] Finish defragmentation function.
-- [ ] Disk read/write.
-- [ ] Reallocate.
-- [ ] Combine with xxHash algorithm.
 
 # License & Attribution
 It uses an custom implemention the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
