@@ -2,9 +2,7 @@
 A tiny database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
 The library is consists of a single C header file which can be easily included in any C or C++ project.
 
-This hash based 'database' is thus fully embeddable and modular.
-
-Three examples are provided such as...
+This hash based 'database' is thus fully embeddable and modular. Three examples are provided such as...
 * Basic usage example, insert, retrieve and delete entries with their respondings keys.
 * A data map switch example, switches between data maps and retrieves values.
 * A disk read and write example, which allows you to store a map on the disk.
