@@ -4,6 +4,11 @@ The library is consists of a single C header file which can be easily included i
 
 This hash based 'database' is thus fully embeddable and modular.
 
+Three examples are provided such as...
+* Basic usage example, insert, retrieve and delete entries with their respondings keys.
+* A data map switch example, switches between data maps and retrieves values.
+* A disk read and write example, which allows you to store a map on the disk.
+
 # Usage
 This is a basic example on how to use the small library correctly. More examples can be found in the example directory.
 
