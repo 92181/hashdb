@@ -12,10 +12,10 @@ This is a basic example on how to use the small library correctly. More examples
 
 ```c
 // Create A Table And Data Array;
-unsigned char **h,*j;dbc(&h,&j,10,200);
+unsigned char *j[32];dbc(j,10,200);
 
 // Insert Key And Corresponding Value;
-dbi("appleHello",5,10);dbi("appenaData",6,10);dbi("orangeHey",6,9);
+dbi("apple","You",5,3);dbi("appena","Love",6,4);dbi("orange","Data",6,4);
 
 // Remove The Entry By The Supplied Key;
 dbd("apple",5);
@@ -24,9 +24,10 @@ dbd("apple",5);
 unsigned char *y,*r;
 
 dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
+dbg("appena",6,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
 
 // Free The Table And Data Array;
-free(h);
+free(*(unsigned char**)j);
 ```
 
 # License & Attribution
