@@ -23,8 +23,8 @@ dbd("apple",5);
 // Retrieve Values Stored In Array By Key;
 unsigned char *y,*r;
 
-dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
-dbg("appena",6,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
+dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}
+dbg("appena",6,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}
 
 // Free The Table And Data Array;
 free(*(unsigned char**)j);
