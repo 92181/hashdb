@@ -31,5 +31,5 @@ free(*(unsigned char**)j);
 ```
 
 # License & Attribution
-It uses an custom implemention the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
+It uses an custom implemention of the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
 This project uses the MIT Attribution license. If you like this project consider starring it.
