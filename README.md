@@ -1,4 +1,4 @@
-# Tiny C Based HashDB
+# Tiny Hashmap Database
 A tiny database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
 The library is consists of a single C header file which can be easily included in any C or C++ project.
 
