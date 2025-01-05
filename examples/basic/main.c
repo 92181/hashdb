@@ -10,8 +10,6 @@ int main()
     // Insert Key And Corresponding Value;
     dbi("apple","You",5,3);dbi("appena","Love",6,4);dbi("orange","Data",6,4);dbi("grape","A hashmap is a data structure that stores key-value pairs for efficient data retrieval using a hash function!!",5,110);
     
-    //printf("t: %lu\n",(unsigned long int)t);printf("j: %lu\n",(unsigned long int)j);
-
     // Remove The Entry By The Supplied Key;
     dbd("apple",5);
 
