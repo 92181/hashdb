@@ -1,11 +1,12 @@
-# Tiny Hashmap Database
+# Tiny Key-Value Database
 A tiny database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
 The library is consists of a single C header file which can be easily included in any C or C++ project.
 
 This hash based 'database' is thus fully embeddable and modular. Three examples are provided such as...
 * Basic usage example, insert, retrieve and delete entries with their respondings keys.
-* A data map switch example, switches between data maps and retrieves values.
-* A disk read and write example, which allows you to store a map on the disk.
+* A disk read and write example, which allows you to store memory pages on the disk.
+
+In the basic usage example context switching between multiple active DB's is also shown.
 
 # Usage
 This is a basic example on how to use the small library correctly. More examples can be found in the example directory.
@@ -32,4 +33,7 @@ free(*(unsigned char**)j);
 
 # License & Attribution
 It uses an custom implemention of the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
+
 This project uses the MIT Attribution license. If you like this project consider starring it.
+
+Made By Wolf Pieter Schulz.
