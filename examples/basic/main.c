@@ -1,25 +1,39 @@
 #include <stdio.h>
-#include "../../hashdb.h"
+#include <unistd.h>
+#include "../../hashdb.c"
+
+// Print Text Response;
+static inline void ptr(char *y,char *r)
+{
+    if(y>0)
+    {
+        write(1,y,r-y);write(1,"\n",2);
+    }
+    else
+    {
+        printf("Not Found!\n");
+    };
+};
 
 // Main Function;
 int main()
 {
     // Create A Table And Data Array;
-    unsigned char *j[32];dbc(j,10,200);
+    hdb j,h;dbc(&j,12,32);//dbc(j,1024,512*512);
+
+    // use h too here!
 
     // Insert Key And Corresponding Value;
-    dbi("apple","You",5,3);dbi("appena","Love",6,4);dbi("orange","Data",6,4);dbi("grape","A hashmap is a data structure that stores key-value pairs for efficient data retrieval using a hash function!!",5,110);
+    dbi(&j,"Apple","The hashmap.",5,12);dbi(&j,"Pear","Data structures.",4,16);dbi(&j,"Orange","Key-value pairs!",6,16);
     
     // Remove The Entry By The Supplied Key;
-    dbd("apple",5);
+    dbd(&j,"Apple",5);
 
     // Retrieve Values Stored In Array By Key;
-    unsigned char *y,*r;
+    char *y,*r;
+    
+    y=dbg(&j,"Apple",5,&r);ptr(y,r);y=dbg(&j,"Pear",4,&r);ptr(y,r);y=dbg(&j,"Grape",5,&r);ptr(y,r);
 
-    dbg("apple",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
-    dbg("appena",6,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
-    dbg("grape",5,&y,&r);if(y>0){while(y<r){printf("%c",*y);y+=1;}printf("\n");}else{printf("Not Found!\n");}
-
-    // Free The Table And Data Array;
-    free(*(unsigned char**)j);
+    // Destroy Datamap Structure;
+    //free(*(unsigned char**)j);
 };
