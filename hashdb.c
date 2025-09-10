@@ -102,7 +102,7 @@ void *walloc(hdb *j,unsigned long s)
     void *p=mmap(NULL,s,PROT_READ|PROT_WRITE,MAP_SHARED,f,0);if((long)p==-1){exit(1);};
 
     // Save Size & File Descriptor;
-    *(unsigned long*)p=s;*(int*)(p+sizeof(long))=f;printf("Page Created:\n");
+    *(unsigned long*)p=s;*(int*)(p+sizeof(long))=f;
 
     return p;
 };
@@ -192,8 +192,6 @@ static inline unsigned int dbc(hdb *j,unsigned int k,unsigned long l)
     // Look For Uninitialized Pages At Path;
     struct dirent *e;DIR *d=opendir(j->n);
 
-    printf("j->n: %s\n",j->n); /// ahhhhh init on pages fails second time because no ZERRO!
-
     if(d!=0)
     {
         while((e=readdir(d))!=0)
@@ -210,21 +208,13 @@ static inline unsigned int dbc(hdb *j,unsigned int k,unsigned long l)
 
             // Save Pointer & File Descriptor;
             dpo(j);*j->p=(unsigned char*)p;j->p+=1;p+=sizeof(unsigned long);*(int*)p=f;p+=sizeof(int);
-            
-            printf("File DesX: %u\n",f);
 
-            char *i=p;
-
- 
-            printf("Name: %s, Size: %lu\n",j->n,l);
-            char *m=i+20;
+            char *i=p,*m=i+20;
 
             // read page content! (Reinsert Entries Into Table);
             while(m<e)
             {
                 unsigned int z=*(unsigned int*)(i+8);unsigned long y=*(unsigned long*)(i+12);
-
-                printf("Sizes: %u, %lu\n",z,y);
 
                 // if keysize == 0  (Always 0 When Not Overwritten!)
                 if(z!=0)
@@ -241,7 +231,6 @@ static inline unsigned int dbc(hdb *j,unsigned int k,unsigned long l)
                 }
                 else
                 {
-                    printf("br\n");
                     // if datasize is zero skip page!
                     break;
                 };            
@@ -253,18 +242,15 @@ static inline unsigned int dbc(hdb *j,unsigned int k,unsigned long l)
         closedir(d);
     };
     
-    printf("j\n");
     if(j->pages==j->p)
     {
-        printf("Empty! thus init!\n"); // should not happen second time!
+        //printf("Empty! thus init!\n"); // should not happen second time!
         l+=sizeof(long)+sizeof(int);*j->p=walloc(j,l);j->y=*j->p+sizeof(long)+sizeof(int);
     }
     else
     {
-        printf("d\n");
         j->p-=1;
     };
-    printf("x\n");
     #else
     *j->p=j->y=malloc(l);
     
@@ -274,7 +260,6 @@ static inline unsigned int dbc(hdb *j,unsigned int k,unsigned long l)
     };
     #endif
 
-    printf("Done\n");
     return 0;
 };
 
@@ -399,4 +384,5 @@ static inline void dbd(hdb *j,char *k,unsigned int s)
         // Convert Stored Pointer To Next Adress;
         f=g;g=*(char**)g;k=n;
     };
+
 };
