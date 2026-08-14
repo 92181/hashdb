@@ -1,0 +1,11 @@
+[package]
+name = "dir_db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fs = "0.0.5"
+
+[[example]]
+name = "disk"
+path = "examples/disk/disk.rs"

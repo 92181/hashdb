@@ -1,35 +1,43 @@
 # Tiny Key-Value Database
-A tiny key-value store database written in plain C, I decided to write this to understand the inner-workings of databases further and familiarize myself with different hashing algoritms such as SHA256 and xxHash.
-The library is consists of a single C header file which can be easily included in any C or C++ project.
+A tiny key-value store database written in Rust, I decided to rewrite this to get a better understanding of rust & it's syntax. Originally it was originally written in C, to get more insight into databases and familiarize myself with different hashing algoritms.
 
-This hash based 'database' is thus fully embeddable and modular. Various use cases are shown such as...
-* Basic usage example, insert, retrieve and delete entries with their respondings keys.
-* A disk write mode (MMAP), which allows you to store memory pages on the disk.
+The library is consists of a single source file which can be easily included in any Rust project.
+
+Various use cases are shown such as:
+* Basic usage example, insert, retrieve and delete entries by key or index.
+* A disk write mode (Flush, Restore), which allows you to store memory pages on the disk.
 * Database context switching, between multiple active DB's.
 
-# Usage
+## Usage
 This is a basic example on how to use the small library correctly.
 
-```c
-// Create Context;
-hdb j;dbc(&j,128,1024);
-
-// Insert Key And Corresponding Value;
-dbi(&j,"Math","The hashmap.",5,12);
-
-// Remove The Entry By The Supplied Key;
-dbd("Math",5);
-
-// Retrieve Values Stored In Array By Key;
-char *y,*r;y=dbg(&j,"Math",5,&r);ptr(y,r);
-
-// Destroy Context;
-dis(&j);
+```rs
+code here!
 ```
 
-# License & Attribution
-It uses an custom implemention of the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
+TODO
 
-This project uses the MIT Attribution license. If you like this project consider starring it.
+1. test disk store (disk example!).
 
-Made By Wolf Pieter Schulz.
+2. add remove entry functionality (defragment function, real_size, free_list) (ask AI).
+
+
+
+// storing a struct on disk using mmap is harder than i thought using rust, so no mmap
+// just disk flush & in memory (at operation).
+// https://www.geeksforgeeks.org/rust/file-i-o-in-rust/
+
+
+
+Rust (Expirimental):
+
+cargo run --example basic
+cargo run --example disk
+
+cargo build (--release)
+
+
+## License & Attribution
+It uses the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
+
+If you like this project consider starring it. Made By Wolf Pieter Schulz.
