@@ -17,42 +17,33 @@ fn main() {
 	add_entry(&mut db, key_name, b"Tasty?");
 
 	if let Ok(d) = get_entry(&db, key_name) {
-		let s = match str::from_utf8(&d) {
-			Ok(v) => v,
-			Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
+		let s = match str::from_utf8(&d) { Ok(v) => v, Err(e) => panic!("Invalid UTF-8: {}", e) };
 
-		println!("result: {}", s);
-		
-		//println!("data: {:#?}", &d[0..4]);
+		println!("Result: {}", s);
 	}
 
-	let _ = disk_flush(&mut db, "./pages"); // TEST!
+	let _ = disk_flush(&mut db, "./pages");
 
 	drop(db);
 
 	println!("Dropped DB, Restore.");
 
 	// Restore From Disk;
-	let db = DB::new().disk_restore("./pages");
+	let mut db = DB::new().disk_restore("./pages");
 
 	if let Ok(d) = get_entry(&db, key_name) {
-		let s = match str::from_utf8(&d) {
-			Ok(v) => v,
-			Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
+		let s = match str::from_utf8(&d) { Ok(v) => v, Err(e) => panic!("Invalid UTF-8: {}", e) };
 
-		println!("result: {}", s);
-		
-		//println!("data: {:#?}", &d[0..4]);
+		println!("Result: {}", s);
 	} else {
 		println!("No entry with name: {}.",key_name);
 	}
 
-	defragment_pages(&db, 1024);
+	println!("Defragment..");
+	defragment_pages(&mut db, 1024); // PANICS
 
 	// Delete 1 Page;
-	if true {
-		let _ = fs::remove_file("./pages/aaaaaaaa");
+	if true { // REMOVE this section after testing.
+		let _ = fs::remove_file("./pages/aaaaaaaa"); 
 	}
 }

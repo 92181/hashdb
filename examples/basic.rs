@@ -7,14 +7,9 @@ fn main() {
 	add_entry(&mut db, "Banana", b"Tasty?");
 
 	if let Ok(d) = get_entry(&db, "Banana") {
-		let s = match str::from_utf8(&d) {
-			Ok(v) => v,
-			Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
+		let s = match str::from_utf8(&d) { Ok(v) => v, Err(e) => panic!("Invalid UTF-8: {}", e) };
 
-		println!("result: {}", s);
-
-		//println!("data: {:#?}", &d[0..4]);
+		println!("Result: {}", s);
 	}
 
 	// Free & Exit;
