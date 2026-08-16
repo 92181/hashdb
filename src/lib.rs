@@ -166,9 +166,71 @@ impl DB {
 	}
 }
 
+// Retrieve Entry;
+fn get_entry_internal(db: &DB, hash: usize, key: &[u8]) -> Result<Entry, u32> {
+	let mut i = db.table[hash];
+
+	while i != 0 {
+		let e = &db.entries[i]; let s = e.pos.1 - e.pos.0;
+		
+		// Check Match;
+		if key.len() == s {
+			let p = &db.pages[e.page_index].0;
+
+			if key == &p[e.pos.0..e.pos.0 + key.len()] {
+				return Ok(*e);
+			}
+		}
+
+		i = e.table_next;
+	}
+
+	return Err(0);
+}
+
+pub fn get_entry(db: &DB, key: &str) -> Result<Vec<u8>, u32> {
+	let k: &[u8] = key.as_bytes(); let mut i = db.table[xxh(k) as usize];
+
+	while i != 0 {
+		let e = &db.entries[i]; let s = e.pos.1 - e.pos.0;
+		
+		// Check Match;
+		if k.len() == s {
+			let p = &db.pages[e.page_index].0;
+
+			if k[..k.len()] == p[e.pos.0..e.pos.0 + k.len()] {
+				let n = e.pos.1;
+
+				return Ok(p[n..n + (e.size as usize - s)].to_vec());
+			}
+		}
+
+		i = e.table_next;
+	}
+
+	return Err(0);
+}
+
+pub fn get_entry_by_index(db: &DB, index: u64) -> Result<Vec<u8>, u32> {
+	let k: [u8; size_of::<u64>()] = index.to_le_bytes();
+
+	if let Ok(e) = get_entry_internal(db, db.table[xxh(&k) as usize], &k) {
+		let n = e.pos.1; let p = &db.pages[e.page_index].0;
+
+		return Ok(p[n..n + (e.size as usize - size_of::<u64>())].to_vec());
+	}
+
+	return Err(0);
+}
+
 // Insert Entry (Key & Value);
 pub fn add_entry(db: &mut DB, key: &str, value: &[u8]) {
-	let (k, v, s) = (key.as_bytes(), value, key.len() + value.len());
+	let (k, v, s) = (key.as_bytes(), value, key.len() + value.len()); let i = xxh(k) as usize;
+
+	// Prevent Duplicates;
+	if let Ok(_d) = get_entry_internal(db, i, k) {
+		return;
+	}
 
 	// Get Memory Page;
 	let data_len = db.pages[db.current_page].0.len();
@@ -206,8 +268,6 @@ pub fn add_entry(db: &mut DB, key: &str, value: &[u8]) {
 	page.1 += s; page.2 += 1;
 
 	// Entry & Table Insert;
-	let i: usize = xxh(k) as usize;
-
 	h.table_next = db.table[i]; db.table[i] = db.entries.len();
 
 	db.entries.push(h);
@@ -215,35 +275,6 @@ pub fn add_entry(db: &mut DB, key: &str, value: &[u8]) {
 
 pub fn add_entry_by_index(db: &mut DB, index: u64, value: &[u8]) {
 	return add_entry(db, &index.to_string(), value);
-}
-
-// Retrieve Entry;
-pub fn get_entry(db: &DB, key: &str) -> Result<Vec<u8>, u32> {
-	let k: &[u8] = key.as_bytes();
-	let mut i = db.table[xxh(k) as usize];
-
-	while i != 0 {
-		let e = &db.entries[i]; let s = e.pos.1 - e.pos.0;
-		
-		// Check Match;
-		if k.len() == s {
-			let p = &db.pages[e.page_index].0;
-
-			if k[..k.len()] == p[e.pos.0..e.pos.0 + k.len()] {
-				let n = e.pos.1;
-
-				return Ok::<Vec<u8>, u32>(p[n..n + (e.size as usize - s)].to_vec());
-			}
-		}
-
-		i = e.table_next;
-	}
-
-	return Err(0);
-}
-
-pub fn get_entry_by_index(db: &DB, index: u64) -> Result<Vec<u8>, u32> {
-	return get_entry(db, &index.to_string());
 }
 
 // Remove Entry Functions;

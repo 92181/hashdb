@@ -1,11 +1,11 @@
 # Tiny Key-Value Database
-A tiny key-value store database written in Rust, I decided to rewrite this to get a better understanding of rust & it's syntax. Originally it was originally written in C, to get more insight into databases and familiarize myself with different hashing algoritms.
+A tiny key-value store database written in Rust. I decided to rewrite this to get a better understanding of Rust & it's syntax. Originally it was originally written in C, to get more insight into databases and familiarize myself with different hashing algoritms.
 
-The library is consists of a single source file which can be easily included in any Rust project.
+The library is consists of a single library file which can be easily included in any Rust project.
 
 Various use cases are shown such as:
 * Basic usage example, insert, retrieve and delete entries by key or index.
-* A disk write mode (Flush, Restore), which allows you to store memory pages on the disk.
+* Disk write mode (flush, restore), which allows you to store memory pages on the disk.
 * Database context switching, between multiple active DB's.
 
 ## Usage
