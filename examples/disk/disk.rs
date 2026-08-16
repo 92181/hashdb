@@ -1,6 +1,5 @@
 use dir_db::*;
 use std::env;
-use std::fs;
 
 fn main() {
 	// Set CWD (Current Working Directory);
@@ -9,7 +8,8 @@ fn main() {
 	}
 
 	// Setup;
-	let mut db = DB::new(); // add later .disk_restore("./pages")
+	//let mut db = DB::new(); // add later .disk_restore("./pages")
+	let mut db = DB::new().disk_restore("./pages");
 
 	let key_name = "Banana";
 
@@ -20,13 +20,13 @@ fn main() {
 		let s = match str::from_utf8(&d) { Ok(v) => v, Err(e) => panic!("Invalid UTF-8: {}", e) };
 
 		println!("Result: {}", s);
+	} else {
+		println!("No entry with name: {}.",key_name);
 	}
 
 	let _ = disk_flush(&mut db, "./pages");
 
 	drop(db);
-
-	println!("Dropped DB, Restore.");
 
 	// Restore From Disk;
 	let mut db = DB::new().disk_restore("./pages");
@@ -39,11 +39,14 @@ fn main() {
 		println!("No entry with name: {}.",key_name);
 	}
 
-	println!("Defragment..");
-	defragment_pages(&mut db, 1024); // PANICS
+	remove_entry(&mut db, "Rust");
+
+	defragment_pages(&mut db, 1024);
+
+	// Still increases disk count each time because duplicate entries! Which is ok but also causes PANIC.
 
 	// Delete 1 Page;
-	if true { // REMOVE this section after testing.
-		let _ = fs::remove_file("./pages/aaaaaaaa"); 
-	}
+	//if true { // REMOVE this section after testing.
+	//	let _ = fs::remove_file("./pages/aaaaaaaa"); 
+	//}
 }

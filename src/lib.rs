@@ -131,8 +131,6 @@ impl DB {
 						let raw = &disk_data[data_pos..data_pos + size_of::<u16>()];
 						let (entry_amount, mut u) = (u16::from_le_bytes(raw.try_into().unwrap()), 0);
 						
-						println!("restore: entry amount: {}",entry_amount); // OK.
-
             data_pos += size_of::<u16>();
 
 						while u < entry_amount && data_pos + D_ENTRY_HEADER < disk_data.len() {
@@ -146,21 +144,14 @@ impl DB {
 								u += 1; continue;
 							}
 
-							println!("restore pages SIZES: {} {}",total_size,key_size);
-
-
 							if data_pos + total_size <= disk_data.len() {
 								let (key, value) = (&disk_data[data_pos..data_pos + key_size], &disk_data[data_pos + key_size..data_pos + total_size]);
 
 								add_entry(&mut self, unsafe { std::str::from_utf8_unchecked(key) }, value);
 								let l = self.entries.len() - 1; self.entries[l].entry_status = 0;
 
-								println!("restore pages 4x3");
-
 								data_pos += total_size - D_ENTRY_HEADER;
 							}
-
-							println!("restore pages 5");
 
 							u += 1;
 						}
@@ -170,8 +161,6 @@ impl DB {
 				return self;
 			}
 
-			println!("restore pages 5");
-
 			path.pop(); c += 1;
 		}
 	}
@@ -180,8 +169,6 @@ impl DB {
 // Insert Entry (Key & Value);
 pub fn add_entry(db: &mut DB, key: &str, value: &[u8]) {
 	let (k, v, s) = (key.as_bytes(), value, key.len() + value.len());
-
-	println!("{}", key); println!("{}", xxh(k));
 
 	// Get Memory Page;
 	let data_len = db.pages[db.current_page].0.len();
@@ -260,51 +247,6 @@ pub fn get_entry_by_index(db: &DB, index: u64) -> Result<Vec<u8>, u32> {
 }
 
 // Remove Entry Functions;
-/*fn remove_reference<'a>(db: &'a mut DB, key: &[u8], hash: usize) -> Result<&'a mut Entry, u32> {
-	let mut i = db.table[hash]; let mut o = i;
-
-	while i != 0 {
-		let e = &db.entries[i]; let s = e.pos.1 - e.pos.0;
-		
-		// Check Match;
-		if key.len() == s {
-			let p = &db.pages[e.page_index].0;
-
-			// Remove Reference (Table / Next);
-			if key[..key.len()] == p[e.pos.0..e.pos.0 + key.len()] {
-				if o == i {
-					db.table[hash] = 0;
-				} else {
-					db.entries[o].table_next = e.table_next;
-				}
-
-				return Ok(&mut db.entries[i]);
-			}
-		}
-
-		o = i; i = e.table_next;
-	}
-
-	return Err(0);
-}
-	
-pub fn remove_entry(db: &mut DB, key: &str) {
-	let k: &[u8] = key.as_bytes();
-
-	if let Ok(e) = remove_reference(db, k, xxh(k) as usize) {
-		e.entry_status = 240; // Mark Deleted;
-	}
-}
-
-pub fn remove_entry_by_index(db: &mut DB, index: u64) {
-	let k: &[u8] = &index.to_le_bytes();
-
-	if let Ok(e) = remove_reference(db, k, xxh(k) as usize) {
-		e.entry_status = 240; // Mark Deleted;
-	}
-}
-*/
-
 fn remove_reference<'a>(table: &mut [usize], pages: &[(Vec<u8>, usize, u16)], entries: &'a mut [Entry], key: &[u8], hash: usize) -> Result<&'a mut Entry, u32> {
 	let mut i = table[hash]; let mut o = i;
 
@@ -349,20 +291,21 @@ pub fn remove_entry_by_index(db: &mut DB, index: u64) {
 
 // Defragment Database (In-Memory);
 pub fn defragment_pages(db: &mut DB, _sensitivity: u32) {
-	let (mut i, mut active_entry) = (0, 0); let mut page_entry_list: Vec<Vec<usize>> = vec![vec![]; db.pages.len()];
+	if db.entries.is_empty() { return; }
+
+	let mut page_entry_list: Vec<Vec<usize>> = vec![vec![]; db.pages.len()];
+	let (mut i, mut active_entry) = (0, db.entries.len() - 1);
 
 	// Compact Entry List;
-	while i < db.entries.len() {
-		let e = &db.entries[i];
-
-		if e.entry_status == 240 {
+	while i < active_entry {
+		if db.entries[i].entry_status == 240 {
 			// Get Next Active;
-			while active_entry < db.entries.len() {
+			while active_entry > 0 {
 				if db.entries[active_entry].entry_status != 240 {
 					break;
 				}
 
-				active_entry += 1;
+				active_entry -= 1;
 			}
 
 			if active_entry != i {
@@ -371,10 +314,7 @@ pub fn defragment_pages(db: &mut DB, _sensitivity: u32) {
 				// Remove Active Entry Reference (Table);
 				let key = &db.pages[x.page_index].0[x.pos.0..x.pos.1]; 
 
-				let hash = xxh(key) as usize; remove_reference(&mut db.table, &db.pages, &mut db.entries, key, hash);
-
-				// Build Page Entry List;
-				page_entry_list[x.page_index].push(active_entry);
+				let hash = xxh(key) as usize; let _ = remove_reference(&mut db.table, &db.pages, &mut db.entries, key, hash);
 
 				db.entries[i] = x;
 
@@ -383,12 +323,17 @@ pub fn defragment_pages(db: &mut DB, _sensitivity: u32) {
 				
 				db.table[hash] = active_entry; 
 			} else {
-				db.entries.truncate(i - 1); break;
+				break;
 			}
 		}
 
-		i += 1; active_entry += 1;
+		// Build Page Entry List;
+		page_entry_list[db.entries[i].page_index].push(i);
+
+		i += 1;
 	}
+
+	db.entries.truncate(active_entry);
 
 	// Compact Data Pages;
 	i = 0;
@@ -396,20 +341,22 @@ pub fn defragment_pages(db: &mut DB, _sensitivity: u32) {
 	while i < db.pages.len() {
 		let (page_entries, mut u, page_data, mut data_shift_pos) = (&page_entry_list[i], 0, &mut db.pages[i].0, 0);
 
-		while u < page_entries.len() - 1 {
-			let e = &mut db.entries[page_entries[u]]; let s = e.size as usize;
+		if !page_entries.is_empty() {
+			while u < page_entries.len() - 1 {
+				let e = &mut db.entries[page_entries[u]]; let s = e.size as usize;
 
-			// Skip (No Gap);
-			if data_shift_pos == e.pos.0 {
-				u += 1; data_shift_pos += s; continue;
+				// Skip (No Gap);
+				if data_shift_pos == e.pos.0 {
+					u += 1; data_shift_pos += s; continue;
+				}
+
+				// Copy (Shift Data);
+				page_data.copy_within(e.pos.0..e.pos.0 + s, data_shift_pos);
+
+				data_shift_pos += s; e.entry_status = 2;
+
+				u += 1;
 			}
-
-			// Copy (Shift Data);
-			page_data.copy_within(e.pos.0..e.pos.0 + s, data_shift_pos);
-
-			data_shift_pos += s; e.entry_status = 2;
-
-			u += 1;
 		}
 
 		// Update Page Info;
@@ -467,28 +414,35 @@ pub fn defragment_pages(db: &mut DB, _sensitivity: u32) {
 
 // DB Disk Flush;
 pub fn disk_flush(db: &mut DB, dir_path: &str) -> Result<(), Box<dyn std::error::Error>> { 
-	let mut i: usize = 0;
+	let (mut i, mut page_max) = (0, 0); let (mut path, mut id_buf) = (PathBuf::from(dir_path), [0u8; 8]);
 
 	while i < db.entries.len() {
 		let e = &mut db.entries[i]; let p = e.page_index;
 
+		// Count Pages;
+		if page_max < p { page_max = p; }
+
 		// Add || Update Entry;
 		if e.entry_status == 1 || e.entry_status == 2 {
-			let (mut path, mut id_buf) = (PathBuf::from(dir_path), [0u8; 8]); DB::get_id_path(p as u64, &mut id_buf);
-
-			path.push(unsafe { std::str::from_utf8_unchecked(&id_buf) });
+			DB::get_id_path(p as u64, &mut id_buf); path.push(unsafe { std::str::from_utf8_unchecked(&id_buf) });
 
 			// Open File;
-			let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path)?;
+			let mut file = OpenOptions::new().read(true).write(true).create(true).open(&path)?; path.pop();
 
 			if file.metadata()?.len() == 0 {
 				let page_size = db.pages[p].0.len(); file.set_len(page_size as u64)?;
 			}
 
-			// Update Entry Count (First: 2B);
-			let mut buf = [0u8; size_of::<u16>()]; file.read_exact(&mut buf)?; let p_entry_index = u16::from_le_bytes(buf);
+			// Get Entry Count (First: U16);
+			let page_data = &db.pages[db.current_page]; 
 
-			// add if higher = entry_count_memory;
+			let mut buf = [0u8; size_of::<u16>()]; file.read_exact(&mut buf)?; let mut p_entry_index = u16::from_le_bytes(buf);
+
+			// Shrink Disk Pages;
+			if p_entry_index > page_data.2 {
+				p_entry_index = page_data.2; file.set_len((page_data.0.len() + D_ENTRY_HEADER * p_entry_index as usize) as u64)?; 
+			}
+
 			if e.entry_status == 1 {
 				file.rewind()?; file.write_all(&(p_entry_index + 1).to_le_bytes())?;
 			}
@@ -499,19 +453,30 @@ pub fn disk_flush(db: &mut DB, dir_path: &str) -> Result<(), Box<dyn std::error:
 			let key_size: u16 = (e.pos.1 - e.pos.0).try_into().unwrap();
 
 			file.write_all(&(e.size + D_ENTRY_HEADER as u64).to_le_bytes())?; 
-			file.write_all(&key_size.to_le_bytes())?; 
-			file.write_all(&p_entry_index.to_le_bytes())?;
+			file.write_all(&key_size.to_le_bytes())?; file.write_all(&p_entry_index.to_le_bytes())?;
 
 			// Write Entry Data;
-			let page_data = &db.pages[db.current_page].0; 
-			let entry_data = &page_data[e.pos.0..e.pos.0 + e.size as usize];
-
-			file.write_all(entry_data)?;
+			let entry_data = &page_data.0[e.pos.0..e.pos.0 + e.size as usize]; file.write_all(entry_data)?;
 
 			e.entry_status = 0;
 		}
 
 		i += 1;
+	}
+
+	// Delete Empty Disk Pages;
+	let mut c: u64 = (page_max as u64) + 1;
+
+	loop {
+		DB::get_id_path(c, &mut id_buf); path.push( unsafe { std::str::from_utf8_unchecked(&id_buf) } );
+
+		if path.exists() {
+			let _ = fs::remove_file(&path); path.pop();
+		} else {
+			break;
+		}
+
+		c += 1;
 	}
 
 	Ok(())
