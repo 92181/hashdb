@@ -12,30 +12,29 @@ Various use cases are shown such as:
 This is a basic example on how to use the small library correctly.
 
 ```rs
-code here!
+use dir_db::*;
+
+fn main() {
+	let mut db = DB::new();
+
+	add_entry(&mut db, "Rust", b"Value");
+	add_entry(&mut db, "Banana", b"Tasty?");
+
+	if let Ok(d) = get_entry(&db, "Banana") {
+		let s = match str::from_utf8(&d) { Ok(v) => v, Err(e) => panic!("Invalid UTF-8: {}", e) };
+
+		println!("Result: {}", s);
+	}
+
+	drop(db);
+}
 ```
 
-TODO
+Run examples with: `cargo run --example basic` and `cargo run --example disk`
 
-1. test disk store (disk example!).
-
-2. add remove entry functionality (defragment function, real_size, free_list) (ask AI).
-
-
-
-// storing a struct on disk using mmap is harder than i thought using rust, so no mmap
-// just disk flush & in memory (at operation).
-// https://www.geeksforgeeks.org/rust/file-i-o-in-rust/
-
-
-
-Rust (Expirimental):
-
-cargo run --example basic
-cargo run --example disk
-
+```sh
 cargo build (--release)
-
+```
 
 ## License & Attribution
 It uses the xxHash hashing algorithm created by Yann Collet (BSD 2-Clause License).
